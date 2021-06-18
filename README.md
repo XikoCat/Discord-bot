@@ -38,6 +38,10 @@ TODO
 
 TODO
 
+## Technical stuff
+
+TODO
+
 ## TODO
 
 Content Creator follow:
@@ -50,11 +54,10 @@ Content Creator follow:
 - Implement Youtube API
 - Broadcast new posts/videos/lives to channels.
 
-Minecraft Server control
+Minecraft Server control;
 
-## Technical stuff
-
-TODO Document CODE;\
-TODO Instructions on how to install and run;\
-TODO Explain `.env` file;\
-TODO Add database structure to project;
+Github actions\
+Document CODE\
+Instructions on how to install and run\
+Explain `.env` file\
+Add database structure to project
