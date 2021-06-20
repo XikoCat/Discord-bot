@@ -7,6 +7,7 @@ chardet==4.0.0
 discord.py==1.7.3
 idna==2.10
 multidict==5.1.0
+mysql-connector-python-rf==2.2.2
 NHentai-API==0.0.16
 python-dotenv==0.17.1
 requests==2.25.1
@@ -14,3 +15,5 @@ soupsieve==2.2.1
 typing-extensions==3.10.0.0
 urllib3==1.26.5
 yarl==1.6.3
+python-twitter==3.5
+black==21.6b0

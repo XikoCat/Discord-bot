@@ -30,7 +30,7 @@ class cat_fun(commands.Cog, name="Fun"):
         winner = ctx.author.id if random.randint(0, 1) == 0 else ctx.message.mentions[0].id
         await ctx.send(f"<@{winner}> has the biggest dick!!!")
 
-
+    ##unused
     @battle.error
     async def battle_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
@@ -46,7 +46,7 @@ class cat_fun(commands.Cog, name="Fun"):
     ######################################################################
 
 
-    @commands.command(name="doilove", help="FInd out how compatible are you with another user")
+    @commands.command(name="doilove", help="Find out how compatible are you with another user")
     async def doilove(self, ctx):
         print(
             "Command Issued: doilove\n   - message: {}\n   - debug: {}".format(

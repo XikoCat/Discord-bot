@@ -32,7 +32,7 @@ bot.load_extension("content_follow")
 
 @bot.event
 async def on_ready():
-    print("Running!\nActive in:")   
+    print("Running!\nActive in:")
     for guild in bot.guilds:
         # for channel in guild.text_channels:
         # if str(channel) == "general":
@@ -46,9 +46,6 @@ async def on_message(message):
     # bot.process_commands(msg) is a couroutine that must be called here since we are overriding the on_message event
     await bot.process_commands(message)
 
-    ctx = await bot.get_context(message)
-    print(f"guild: {ctx.guild}, channel: {ctx.channel}")
-
     message_string = str(message.content).lower()
     if message_string.find("tetr.io") != -1 or message_string.find("tetris") != -1:
         await message.channel.send(
@@ -59,7 +56,6 @@ async def on_message(message):
         await message.channel.send(
             "Why!? Why would you bring that bloody cursed word upon this land!"
         )
-
 
     if message_string in ["swear_word1", "swear_word2"]:
         await message.channel.purge(limit=1)
