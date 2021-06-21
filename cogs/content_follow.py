@@ -4,6 +4,7 @@ from discord.utils import get
 
 from .utils import db, twitter_api
 
+
 class cat_content_follow(commands.Cog, name="Content Follow"):
     """Documentation"""
 
@@ -167,10 +168,12 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
             )
         sub_id = sub_id.pop().id
 
-        db.insert(f"DELETE FROM subscription WHERE id = {sub_id}") # delete subscription
+        db.insert(
+            f"DELETE FROM subscription WHERE id = {sub_id}"
+        )  # delete subscription
 
         # TODO remove guild-channel if not subscribed to anything
-        
+
         # TODO remove platform-creator if there are no subscritions to it
 
         await ctx.send(f"Success! Unsubscribed from {platform} user: {account}")
@@ -201,8 +204,10 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
             f"SELECT * FROM channel WHERE guild = '{ctx.guild}' AND channel = '{ctx.channel}'"
         )
         if len(gc_id) == 0:
-            return await ctx.send("Channel not subscribed to any content!"
-            + " To subscribe use `%subscribe`")
+            return await ctx.send(
+                "Channel not subscribed to any content!"
+                + " To subscribe use `%subscribe`"
+            )
         gc_id = gc_id.pop().id
         sub_list = db.query(
             "SELECT content_creator.platform, content_creator.tag, subscription.channel"

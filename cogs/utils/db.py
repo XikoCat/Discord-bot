@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+from mysql.connector import errorcode
 
 load_dotenv()
 
@@ -57,6 +58,7 @@ def insert(query):
     cnx.close()
 
     return id
+
 
 def parse_str(db_str):
     return str(db_str).split("'")[1]

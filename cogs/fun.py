@@ -1,21 +1,14 @@
 import discord
 from discord.ext import commands
-from datetime import datetime
 
 import random
+
 
 class cat_fun(commands.Cog, name="Fun"):
     """Documentation"""
 
     def __init__(self, bot):
         self.bot = bot
-
-    #######################################################################
-    #############################          ################################
-    #############################  BATTLE  ################################
-    #############################          ################################
-    #######################################################################
-
 
     @commands.command(name="battle", help="Battle with another user")
     async def battle(self, ctx):
@@ -27,7 +20,9 @@ class cat_fun(commands.Cog, name="Fun"):
         if ctx.author.id == ctx.message.mentions[0].id:
             await ctx.send("Don't battle yourself, you LONER!")
             return
-        winner = ctx.author.id if random.randint(0, 1) == 0 else ctx.message.mentions[0].id
+        winner = (
+            ctx.author.id if random.randint(0, 1) == 0 else ctx.message.mentions[0].id
+        )
         await ctx.send(f"<@{winner}> has the biggest dick!!!")
 
     ##unused
@@ -38,15 +33,9 @@ class cat_fun(commands.Cog, name="Fun"):
         else:
             await ctx.send(f"A batalha fudeu: {error}")
 
-
-    ######################################################################
-    #############################         ################################
-    ############################# DOILOVE ################################
-    #############################         ################################
-    ######################################################################
-
-
-    @commands.command(name="doilove", help="Find out how compatible are you with another user")
+    @commands.command(
+        name="doilove", help="Find out how compatible are you with another user"
+    )
     async def doilove(self, ctx):
         print(
             "Command Issued: doilove\n   - message: {}\n   - debug: {}".format(
@@ -54,7 +43,9 @@ class cat_fun(commands.Cog, name="Fun"):
             )
         )
         if len(ctx.message.mentions) == 0:
-            await ctx.send("Yes you do! But WHO is the question... do `!doilove @person`")
+            await ctx.send(
+                "Yes you do! But WHO is the question... do `!doilove @person`"
+            )
             return
         lovemeter = (
             69 - (ctx.message.author.id - ctx.message.mentions[0].id) % 69 + 4
@@ -83,7 +74,6 @@ class cat_fun(commands.Cog, name="Fun"):
         if lovemeter == 5:
             msg += "\nDamn, {} must give you lots of wet dreams!!"
         await ctx.send(msg.format(ctx.message.mentions[0].display_name))
-
 
 
 def setup(bot):

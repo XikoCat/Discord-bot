@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from datetime import datetime
 
+
 class cat_debug(commands.Cog, name="Debug commands"):
     """Documentation"""
 
@@ -10,19 +11,24 @@ class cat_debug(commands.Cog, name="Debug commands"):
 
     @commands.command()
     async def tell_me_about_yourself(self, ctx):
-        print(f"[{datetime.now()}] Command Issued: tell_me_about_yourself\n   - message: {ctx.message.content}\n   - debug: {ctx.message}")
+        print(
+            f"[{datetime.now()}] Command Issued: tell_me_about_yourself\n   - message: {ctx.message.content}\n   - debug: {ctx.message}"
+        )
         text = "My name is OnikenX's pet!\n I was built originally by Kakarot2000. I'm now ~~a slave to OnikenX~~ OnikenX's loyal pet, you can see my services with !help.\n :)"
         await ctx.send(text)
 
     @commands.command(help="Prints details of Author")
     async def whats_my_name(self, ctx):
-        print(f"[{datetime.now()}] Command Issued: whats_my_name\n   - message: {ctx.message.content}\n   - debug: {ctx.message}")
+        print(
+            f"[{datetime.now()}] Command Issued: whats_my_name\n   - message: {ctx.message.content}\n   - debug: {ctx.message}"
+        )
         await ctx.send(f"Hello {ctx.author.name}")
-
 
     @commands.command(help="Prints details of Server")
     async def where_am_i(self, ctx):
-        print(f"[{datetime.now()}] Command Issued: where_am_i\n   - message: {ctx.message.content}\n   - debug: {ctx.message}")
+        print(
+            f"[{datetime.now()}] Command Issued: where_am_i\n   - message: {ctx.message.content}\n   - debug: {ctx.message}"
+        )
         owner = str(ctx.guild.owner)
         region = str(ctx.guild.region)
         guild_id = str(ctx.guild.id)
@@ -42,6 +48,7 @@ class cat_debug(commands.Cog, name="Debug commands"):
         embed.add_field(name="Member Count", value=memberCount, inline=True)
 
         await ctx.send(embed=embed)
-    
+
+
 def setup(bot):
     bot.add_cog(cat_debug(bot))
