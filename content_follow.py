@@ -1,3 +1,4 @@
+from os import name
 from discord.ext import commands, tasks
 from discord.utils import get
 from datetime import datetime
@@ -24,6 +25,7 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
         i = 0
         for p in self.platform_list:
             i = i + 1
+            print(p)
             str(p).find(platform) != -1
             return i
         return -1
@@ -33,7 +35,7 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
         creator_list = db.query("SELECT * FROM content_creator")
         for creator in creator_list:
             print(f"Verifying: {creator}")
-            link = self.getPost(creator.platform, str(creator.tag).split("'")[1])
+            link = self.getPost(creator.platform, db.parse_str(creator.tag))
             if str(creator.last_read).find(str(link)) == -1:
                 print(f" ->Found new post: {link}")
                 db.insert(
@@ -45,12 +47,10 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
                     + f" WHERE subscription.content_creator = '{creator.id}'"
                 )
                 for sub in subs:
-                    guild = get(self.bot.guilds, name=str(sub.guild).split("'")[1])
-                    channel = get(
-                        guild.text_channels, name=str(sub.channel).split("'")[1]
-                    )
+                    guild = get(self.bot.guilds, name=db.parse_str(sub.guild))
+                    channel = get(guild.text_channels, name=db.parse_str(sub.channel))
                     if channel is not None:
-                        c_nome = str(creator.tag).split("'")[1]
+                        c_nome = db.parse_str(creator.tag)
                         await channel.send(f"{c_nome} posted:\n{link}")
 
     @check_creator_posts.before_loop
@@ -75,10 +75,10 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
         if platform_id == -1:
             return await ctx.send(f"Invalid platform: {platform}")
 
-        # if content exists on platform
+        # if content exists on twitter
         if platform.find("twitter") != -1 and not ct_twitter.user_is_valid(account):
             return await ctx.send(f"Invalid twitter user: {account}")
-        # TODO ADD OTHER PLATFORM VERIFICATIONS
+        # TODO if content exists on other platforms
 
         creator_id = db.query(
             f"SELECT * FROM content_creator WHERE platform = '{platform_id}' AND tag = '{account}'"
@@ -138,26 +138,32 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
         if platform_id == -1:
             return await ctx.send(f"Invalid platform: {platform}")
 
+        # if content creator exists
         creator_id = db.query(
             f"SELECT * FROM content_creator WHERE platform = '{platform_id}' AND tag = '{account}'"
         )
         if len(creator_id) == 0:
+            # content creator not registered
             return await ctx.send(
                 f"Error: This channel is not subscribed to {platform} user: {account}"
             )
         creator_id = creator_id.pop().id
 
+        # get the current guild-channel if it exists
         channel_id = db.query(
             f"SELECT * FROM channel WHERE guild = '{ctx.guild}' AND channel = '{ctx.channel}'"
         )
         if len(channel_id) == 0:
+            # guild-channel not registered
             return await ctx.send(f"Error: This channel is not subscribed to anything")
         channel_id = channel_id.pop().id
 
+        # get the subscription id of pair content-channel if it exists
         sub_id = db.query(
             f"SELECT * FROM subscription WHERE channel = '{channel_id}' AND content_creator = '{creator_id}'"
         )
         if len(sub_id) < 1:
+            # subscription does not exist
             print(
                 f"{ctx.guild} - channel: {ctx.channel} is not subscribed to {platform} user: {account}"
             )
@@ -166,7 +172,12 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
             )
         sub_id = sub_id.pop().id
 
-        db.insert(f"DELETE FROM subscription WHERE id = {sub_id}")
+        db.insert(f"DELETE FROM subscription WHERE id = {sub_id}") # delete subscription
+
+        # TODO remove guild-channel if not subscribed to anything
+        
+        # TODO remove platform-creator if there are no subscritions to it
+
         await ctx.send(f"Success! Unsubscribed from {platform} user: {account}")
 
     @unsubscribe.error
@@ -184,7 +195,7 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
         self.platform_list = db.query("SELECT * FROM platform WHERE available = '1'")
         msg = "Currently available platforms:\n`"
         for p in self.platform_list:
-            name = str(p.name).split("'")[1]
+            name = db.parse_str(p.name)
             msg += f"{name}\n"
         msg += "`"
         await ctx.send(msg)
@@ -194,15 +205,22 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
         gc_id = db.query(
             f"SELECT * FROM channel WHERE guild = '{ctx.guild}' AND channel = '{ctx.channel}'"
         )
+        if len(gc_id) == 0:
+            return await ctx.send("Channel not subscribed to any content!"
+            + " To subscribe use `%subscribe`")
         gc_id = gc_id.pop().id
         sub_list = db.query(
-            f"SELECT content_creator.id, content_creator.platform, content_creator.tag, subscription.channel FROM subscription RIGHT JOIN content_creator ON subscription.content_creator = content_creator.id WHERE subscription.channel = '{gc_id}'"
+            "SELECT content_creator.platform, content_creator.tag, subscription.channel"
+            + " FROM subscription"
+            + " RIGHT JOIN content_creator"
+            + " ON subscription.content_creator = content_creator.id"
+            + f" WHERE subscription.channel = '{gc_id}'"
         )
 
         msg = "Currently subscribed creators:\n`"
         for p in sub_list:
-            plat = str(self.platform_list[p.platform - 1].name).split("'")[1]
-            tag = str(p.tag).split("'")[1]
+            plat = db.parse_str(self.platform_list[p.platform - 1].name)
+            tag = db.parse_str(p.tag)
             msg += f"{plat}: {tag}\n"
         msg += "`"
         await ctx.send(msg)

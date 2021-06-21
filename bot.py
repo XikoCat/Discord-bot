@@ -15,11 +15,10 @@ print(f"prefix: {PREFIX}")
 intents = discord.Intents.default()
 intents.members = True
 bot = commands.Bot(command_prefix=PREFIX, intents=intents)
-bot.load_extension("fun")
-bot.load_extension("nhentai")
-bot.load_extension("debug")
-bot.load_extension("mc_server")
-bot.load_extension("content_follow")
+
+cogs = ["fun", "nhentai", "debug", "mc_server", "content_follow"]
+for cog in cogs:
+    bot.load_extension(cog)
 
 # bot = discord.Client(intents=intents)
 

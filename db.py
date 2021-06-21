@@ -57,3 +57,6 @@ def insert(query):
     cnx.close()
 
     return id
+
+def parse_str(db_str):
+    return str(db_str).split("'")[1]

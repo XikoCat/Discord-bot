@@ -42,15 +42,6 @@ class cat_debug(commands.Cog, name="Debug commands"):
         embed.add_field(name="Member Count", value=memberCount, inline=True)
 
         await ctx.send(embed=embed)
-
-        #Requires Privileged Gateway Intents - Server Members Intent Enabled.
-        #members = []
-        #async for member in ctx.guild.fetch_members(limit=150):
-        #    await ctx.send(
-        #        "Name : {}\t Status : {}\n Joined at {}".format(
-        #            member.display_name, str(member.status), str(member.joined_at)
-        #        )
-        #    )
     
 def setup(bot):
     bot.add_cog(cat_debug(bot))
