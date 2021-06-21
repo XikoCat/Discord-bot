@@ -16,9 +16,9 @@ intents = discord.Intents.default()
 intents.members = True
 bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 
-cogs = ["fun", "nhentai", "debug", "mc_server", "content_follow"]
+cogs = ["admin", "fun", "nhentai", "debug", "mc_server", "content_follow"]
 for cog in cogs:
-    bot.load_extension(cog)
+    bot.load_extension("cogs."+cog)
 
 # bot = discord.Client(intents=intents)
 

@@ -31,7 +31,7 @@ def connect():
 
 
 def query(query):
-    print(f"Quering database with: {query}")
+    print(f"   Quering database with: {query}")
     cnx = connect()
     cursor = cnx.cursor(named_tuple=True)
 

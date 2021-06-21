@@ -2,10 +2,7 @@ import os
 from dotenv import load_dotenv
 import twitter
 
-import json
-
 load_dotenv()
-
 
 twitter_api = twitter.Api(
     consumer_key=os.getenv("Twitter_API_key"),

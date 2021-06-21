@@ -1,13 +1,8 @@
 from os import name
 from discord.ext import commands, tasks
 from discord.utils import get
-from datetime import datetime
-from threading import Thread
-import time
 
-import db
-import content_twitter as ct_twitter
-
+from .utils import db, twitter_api
 
 class cat_content_follow(commands.Cog, name="Content Follow"):
     """Documentation"""
@@ -59,7 +54,7 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
 
     def getPost(self, platform, account):
         if platform == 1:
-            return ct_twitter.get_tweet(screen_name=account)
+            return twitter_api.get_tweet(screen_name=account)
         # TODO ADD MORE PLATORMS
 
     @commands.command(

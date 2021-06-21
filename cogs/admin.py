@@ -1,13 +1,10 @@
 from discord.ext import commands
 from .utils import checks
-import discord
 import inspect
 
-# to expose to the eval command
-import datetime
 from collections import Counter
 
-class Admin:
+class Admin(commands.Cog, name="Admin commands"):
     """Admin-only commands that make the bot dynamic."""
 
     def __init__(self, bot):
