@@ -8,4 +8,6 @@ format:
 run:
 	python3 bot.py
 
+frun: format run
+
 all: install format run

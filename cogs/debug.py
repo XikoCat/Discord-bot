@@ -14,7 +14,7 @@ class cat_debug(commands.Cog, name="Debug commands"):
         print(
             f"[{datetime.now()}] Command Issued: tell_me_about_yourself\n   - message: {ctx.message.content}\n   - debug: {ctx.message}"
         )
-        text = "My name is OnikenX's pet!\n I was built originally by Kakarot2000. I'm now ~~a slave to OnikenX~~ OnikenX's loyal pet, you can see my services with !help.\n :)"
+        text = "My name is XikoBot!\n. My creator is XikoCat. Check him out on twitter: https://twitter.com/xikocat\nType %help, to get a list of commands.\n :)"
         await ctx.send(text)
 
     @commands.command(help="Prints details of Author")

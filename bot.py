@@ -20,29 +20,17 @@ cogs = ["admin", "fun", "nhentai", "debug", "mc_server", "content_follow"]
 for cog in cogs:
     bot.load_extension("cogs." + cog)
 
-# bot = discord.Client(intents=intents)
-
-##########################################################################
-##############################  NORMAL  ##################################
-##############################   BOT    ##################################
-##############################   STUFF  ##################################
-##########################################################################
-
 
 @bot.event
 async def on_ready():
     print("Running!\nActive in:")
     for guild in bot.guilds:
-        # for channel in guild.text_channels:
-        # if str(channel) == "general":
-        # await channel.send("Bot Activated..")
-        # await channel.send(file=discord.File("giphy.png"))
         print(f" - {guild.name} | Member Count : {guild.member_count}")
 
 
 @bot.event
 async def on_message(message):
-    # bot.process_commands(msg) is a couroutine that must be called here since we are overriding the on_message event
+    # bot.process_commands(msg) is a coroutine that must be called here since we are overriding the on_message event
     await bot.process_commands(message)
 
     message_string = str(message.content).lower()
