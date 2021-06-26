@@ -31,7 +31,7 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
         if self.debug:
             print("   - " + msg)
 
-    @tasks.loop(seconds=60)
+    @tasks.loop(minutes=3)
     async def check_creator_posts(self):
         now = datetime.now()
         print(f"[{now}] Checking for new posts!")
@@ -41,6 +41,10 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
 
         for creator in creator_list:
             # self.debugPrint(f" Verifying: {creator.doc_id} - {creator}")
+
+            p = self.platform_list.get(doc_id=creator["social_platform"])
+            if not p["available"]:
+                continue
 
             # get the latest post
             post = self.getPost(creator["social_platform"], creator["tag"])
@@ -127,7 +131,7 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
         )
 
         platform_arg = str(arg1).lower()
-        creator_arg = str(arg2).lower()
+        creator_arg = str(arg2)
 
         msg = f"Subscribing to {platform_arg} user: {creator_arg}, please hold..."
         self.debugPrint(msg)
