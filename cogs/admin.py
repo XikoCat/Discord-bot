@@ -12,44 +12,45 @@ class Admin(commands.Cog, name="Admin commands"):
         self.bot = bot
 
     @commands.command(hidden=True)
-    @checks.is_owner()
-    async def load(self, *, module: str):
+    @commands.is_owner()
+    async def load(self, ctx, arg1):
         """Loads a module."""
         try:
-            self.bot.load_extension(module)
+            self.bot.load_extension(arg1)
         except Exception as e:
-            await self.bot.say("\N{PISTOL}")
-            await self.bot.say("{}: {}".format(type(e).__name__, e))
+            await ctx.send("\N{SKULL}")
+            await ctx.send("{}: {}".format(type(e).__name__, e))
         else:
-            await self.bot.say("\N{OK HAND SIGN}")
+            await ctx.send("\N{OK HAND SIGN}")
 
     @commands.command(hidden=True)
-    @checks.is_owner()
-    async def unload(self, *, module: str):
+    @commands.is_owner()
+    async def unload(self, ctx, arg1):
         """Unloads a module."""
         try:
-            self.bot.unload_extension(module)
+            self.bot.unload_extension(arg1)
         except Exception as e:
-            await self.bot.say("\N{PISTOL}")
-            await self.bot.say("{}: {}".format(type(e).__name__, e))
+            await ctx.send("\N{SKULL}")
+            await ctx.send("{}: {}".format(type(e).__name__, e))
         else:
-            await self.bot.say("\N{OK HAND SIGN}")
+            await ctx.send("\N{OK HAND SIGN}")
 
     @commands.command(name="reload", hidden=True)
-    @checks.is_owner()
-    async def _reload(self, *, module: str):
+    @commands.is_owner()
+    async def _reload(self, ctx, arg1):
         """Reloads a module."""
+
         try:
-            self.bot.unload_extension(module)
-            self.bot.load_extension(module)
+            self.bot.unload_extension(arg1)
+            self.bot.load_extension(arg1)
         except Exception as e:
-            await self.bot.say("\N{PISTOL}")
-            await self.bot.say("{}: {}".format(type(e).__name__, e))
+            await ctx.send("\N{SKULL}")
+            await ctx.send("{}: {}".format(type(e).__name__, e))
         else:
-            await self.bot.say("\N{OK HAND SIGN}")
+            await ctx.send("\N{OK HAND SIGN}")
 
     @commands.command(pass_context=True, hidden=True)
-    @checks.is_owner()
+    @commands.is_owner()
     async def debug(self, ctx, *, code: str):
         """Evaluates code."""
         code = code.strip("` ")

@@ -48,12 +48,5 @@ async def on_message(message):
         await message.channel.purge(limit=1)
 
 
-@bot.event
-async def on_member_join(member):
-    for channel in member.guild.text_channels:
-        if str(channel) == "general":
-            await channel.send(f"Welcome to the Server {member.name}!!")
-
-
 if __name__ == "__main__":
     bot.run(DISCORD_TOKEN)

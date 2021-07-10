@@ -6,3 +6,4 @@ tinydb==4.4.0
 python-twitter==3.5
 google-api-python-client==2.10.0
 twitch-python==0.0.19
+mcrcon
