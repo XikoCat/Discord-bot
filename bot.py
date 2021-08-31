@@ -1,5 +1,6 @@
 import discord
 import os
+import time
 
 from discord.ext import commands, tasks
 from discord.ext.commands import Context
@@ -16,7 +17,7 @@ intents = discord.Intents.default()
 intents.members = True
 bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 
-cogs = ["admin", "fun", "nhentai", "debug", "mc_server", "content_follow"]
+cogs = ["admin", "fun", "nhentai", "debug", "mc_server", "content_follow", "iot"]
 for cog in cogs:
     bot.load_extension("cogs." + cog)
 
