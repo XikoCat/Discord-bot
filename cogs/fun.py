@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 
 import random
-from .utils import tuya
 
 
 class cat_fun(commands.Cog, name="Fun"):
@@ -70,7 +69,7 @@ class cat_fun(commands.Cog, name="Fun"):
             msg += "\nYou're better of as friends."
         if lovemeter == 3:
             msg += "\nThis might just work out!"
-        if lovemeter == 4 or lovemeter == 5:must give you lots of wet dreams
+        if lovemeter == 4 or lovemeter == 5:
             msg += "\nDamn, {} perfect for each other!!"
         await ctx.send(msg.format(ctx.message.mentions[0].display_name))
 
