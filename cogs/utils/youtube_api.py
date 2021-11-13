@@ -12,24 +12,6 @@ api_key = os.getenv("Youtube_API_key")
 youtube = build("youtube", "v3", developerKey=api_key)
 
 
-def channel_by_search(query):
-    request = youtube.search().list(
-        part="snippet", q=query, maxResults=1, type="channel"
-    )
-    response = request.execute()
-
-    result_count = response["pageInfo"]["totalResults"]
-    if result_count == 0:
-        return None
-
-    search = response["items"].pop()
-
-    channel_id = search["snippet"]["channelId"]
-    name = search["snippet"]["title"]
-
-    return {"tag": channel_id, "name": name}
-
-
 def channel_by_username(username):
     request = youtube.channels().list(part="snippet", forUsername=username)
     response = request.execute()
@@ -71,23 +53,24 @@ def get_channel_info(channel):
     if creator is not None:
         return creator
 
-    # search with channel as keyword
-    creator = channel_by_search(channel)
-    if creator is not None:
-        return creator
-
     # if nothing found
     return None
 
 
 def get_latest_video(channel_id):
-    request = youtube.search().list(
-        part="snippet", channelId=channel_id, maxResults=1, order="date", type="video"
-    )
-    response = request.execute()
 
-    video = response["items"].pop()
-    username = video["snippet"]["channelTitle"]
-    link = "https://www.youtube.com/watch?v=" + video["id"]["videoId"]
+    # request = youtube.search().list(
+    #    part="snippet", channelId=channel_id, maxResults=1, order="date", type="video"
+    # )
+    # response = request.execute()
+
+    # video = response["items"].pop()
+
+    # username = video["snippet"]["channelTitle"]
+    # link = "https://www.youtube.com/watch?v=" + video["id"]["videoId"]
+
+    username = "test"
+    link = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+
     post = {"link": link, "username": username}
     return post

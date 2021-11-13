@@ -20,7 +20,7 @@ class cat_mc_server(commands.Cog, name="Minecraft server control"):
         self.server = None
         self.server_started = False
 
-        self.wait_time = 10  # time in minutes the server will be up with no one inside
+        self.wait_time = 20  # time in minutes the server will be up with no one inside
         self.time = 0
 
         self.on_minute.start()
@@ -46,7 +46,7 @@ class cat_mc_server(commands.Cog, name="Minecraft server control"):
 
         if self.server_started:
             players_list = self.rcon("/list")
-            players_on = int(players_list.split(" ")[2])
+            players_on = int(players_list.split(" ")[2].split("/")[0])
             print(players_on)
             if players_on > 0:
                 self.time = self.wait_time
@@ -85,7 +85,7 @@ class cat_mc_server(commands.Cog, name="Minecraft server control"):
 
             players_list = self.rcon("/list")
 
-            players_count = int(players_list.split(" ")[2])
+            players_count = int(players_list.split(" ")[2].split("/")[0])
 
             temp_list = players_list.split(" ")
 
@@ -120,9 +120,10 @@ class cat_mc_server(commands.Cog, name="Minecraft server control"):
         server_jar = os.getenv("MC_Server_jar_file")
         minRam = os.getenv("MC_alloc_mem_min")
         maxRam = os.getenv("MC_alloc_mem_max")
+        java_parameters = "-XX:+UseG1GC -Dsun.rmi.dgc.server.gcInterval=2147483646 -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M -Dfml.readTimeout=180"
         public_ip = os.getenv("MC_Server_public_ip")
 
-        executable = f"java -Xms{minRam} -Xmx{maxRam} -jar {server_jar} nogui"
+        executable = f"~/minecraft-server/jdk8u312-b07/bin/java -server {java_parameters} -Xms{minRam} -Xmx{maxRam} -jar {server_jar} nogui"
         if self.server_started:
             return await ctx.send("Sever is already STARTED")
         print(
@@ -134,7 +135,7 @@ class cat_mc_server(commands.Cog, name="Minecraft server control"):
         self.server_started = True
         self.time = self.wait_time
         await ctx.send(
-            f"Server is starting! IP: `{public_ip}`\n"
+            f"Server is starting! Please wait 7 minutes... IP: `{public_ip}`\n"
             + f"If no one joins within {self.wait_time} minutes the server will close"
         )
 
@@ -145,19 +146,19 @@ class cat_mc_server(commands.Cog, name="Minecraft server control"):
         print("Server stopping...")
 
         if not now:
-            await self.server_command("say The server is shutting down in 5 minutes!")
+            await self.server_command("say Shutting down in 5 minutes!")
             time.sleep(240)  # wait 4 minutes
-            await self.server_command("say The server is shutting down in 1 minute!")
+            await self.server_command("say Shutting down in 1 minute!")
             time.sleep(30)  # wait a few seconds in between messages
-            await self.server_command("say The server is shutting down in 30 seconds!")
+            await self.server_command("say Shutting down in 30 seconds!")
             time.sleep(20)  # wait a few seconds in between messages
-            await self.server_command("say The server is shutting down in 10 seconds!")
+            await self.server_command("say Shutting down in 10 seconds!")
             time.sleep(5)  # wait a few seconds in between messages
-            await self.server_command("say The server is shutting down in 5 seconds!")
+            await self.server_command("say Shutting down in 5 seconds!")
             time.sleep(5)  # wait a few seconds in between messages
 
         await self.server_command("stop")
-        time.sleep(20)
+        time.sleep(120)
         self.server.kill()
         time.sleep(10)  # wait 10 more seconds to let things cool down
         self.server_started = False
@@ -177,11 +178,11 @@ class cat_mc_server(commands.Cog, name="Minecraft server control"):
         if arg1.find("start") != -1:
             return await self.server_start(ctx)
 
-        if arg1.find("stop") != -1:
+        if arg1.find("stop_now") != -1:
             return await self.server_stop(ctx, now=True)
 
-        if arg1.find("stats") != -1:
-            return
+        if arg1.find("stop") != -1:
+            return await self.server_stop(ctx)
 
         return await ctx.send(
             f'Invalid argument "{arg1}"\nType `%mc help` for a list of options'
