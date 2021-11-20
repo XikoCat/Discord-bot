@@ -1,222 +1,138 @@
 import discord
 from discord.ext import commands, tasks
-
 import os
+from discord.ext.commands.converter import PartialMessageConverter
 from dotenv import load_dotenv
-
-import subprocess
+import requests
+from requests.api import request
 
 load_dotenv()
-
-import time
-
-from mcrcon import MCRcon
 
 
 class cat_mc_server(commands.Cog, name="Minecraft server control"):
     def __init__(self, bot):
         self.bot = bot
-
-        self.server = None
-        self.server_started = False
-
-        self.wait_time = 20  # time in minutes the server will be up with no one inside
+        self.wait_time = os.getenv("MC_idle_minutes")
         self.time = 0
-
         self.on_minute.start()
 
     def cog_unload(self):
         self.on_minute.cancel()
-
-    def rcon(self, cmd):
-        ip = os.getenv("MC_rcon_ip")
-        secret = os.getenv("MC_rcon_secret")
-
-        mcr = MCRcon(ip, secret)
-        mcr.connect()
-        resp = mcr.command(cmd)
-        mcr.disconnect()
-
-        return resp
 
     @tasks.loop(minutes=1)
     async def on_minute(self):
         if self.time > 0:
             self.time -= 1
 
-        if self.server_started:
-            players_list = self.rcon("/list")
+        if self.request_server("state").find("on") == 0:
+            players_list = self.request_server("list")
             players_on = int(players_list.split(" ")[2].split("/")[0])
-            print(players_on)
             if players_on > 0:
                 self.time = self.wait_time
-            print(self.time)
+            print(f"Players on: {players_on}, Staying on for {self.time} minutes")
 
             if self.time == 0:
-                await self.server_command("stop")
-                time.sleep(30)
-                self.server.kill()
-                self.server_started = False
+                self.request_server("stop")
+                print("Stopping the server!")
 
-    async def mc_help(self, ctx):
-        msg = (
-            "```Minecraft server control\n"
-            + "\n"
-            + "Usage %mc <arg>\n"
-            + "\n"
-            + "Options:\n"
-            + "  help         Displays this message\n"
-            + "  start        Starts the server, a message is sent once the server is fully started and ready to join.\n"
-            + f"                  The server will stay up for {self.wait_time} minutes until someone joins.\n"
-            + "  info         Displays some info about the server: ip, state, up time, players online\n"
-            + "```"
-        )
-        return await ctx.send(msg)
+    @commands.command(
+        name="mc",
+        help="Minecraft server info",
+    )
+    async def mc(self, ctx):
+        return await self.server_info(ctx)
 
-    async def mc_info(self, ctx):
+    @commands.command(
+        name="mc_start",
+        help="Start the minecraft server",
+    )
+    async def mc_start(self, ctx):
+        state = self.request_server("state")
+
+        if state.find("on") == 0:
+            self.time = self.wait_time
+            await ctx.send(
+                f"Server is already on\n Reseting shutdown timer ({self.wait_time} mins)"
+            )
+
+        if state.find("starting") == 0:
+            await ctx.send("Server is already starting")
+
+        if state.find("off") == 0:
+            self.request_server("start")
+            await ctx.send("Starting the server")
+
+        return await self.server_info(ctx)
+
+    @commands.command(
+        name="mc_stop",
+        help="(Admin Only) Stop the minecraft server",
+        hidden=False,
+    )
+    @commands.is_owner()
+    async def mc_stop(self, ctx):
+        state = self.request_server("state")
+
+        if state.find("on") == 0:
+            self.request_server("stop")
+            await ctx.send(f"Stopping the server")
+
+        if state.find("starting") == 0:
+            await ctx.send(
+                "Server is starting\nPlease wait until the server is on to stop it"
+            )
+
+        if state.find("off") == 0:
+            await ctx.send("Server is already off")
+
+        return await self.server_info(ctx)
+
+    def request_server(self, arg):
+        rcon = os.getenv("MC_Rcon_IP")
+        answ = requests.get(f"{rcon}/{arg}")
+        if answ.status_code == 200:
+            return answ.text
+        print(f"Got error code {answ.status.code}\n")
+
+    async def server_info(self, ctx):
+        rcon = os.getenv("MC_Rcon_IP")
+
         public_ip = os.getenv("MC_Server_public_ip")
         pack = os.getenv("MC_Server_pack")
         pack_version = os.getenv("MC_Pack_version")
         pack_download_link = os.getenv("MC_Pack_Download_link")
         server_description = os.getenv("MC_Description")
 
-        state = "OFF\n to turn on do:\n%mc start"
-        if self.server_started:
+        state = self.request_server("state")
+        players_list = footer = None
 
-            players_list = self.rcon("/list")
+        if state.find("on") == 0:
+            players_list = self.request_server("list")
 
-            players_count = int(players_list.split(" ")[2].split("/")[0])
+        if state.find("starting") == 0:
+            footer = "Please hold a few minutes..."
 
-            temp_list = players_list.split(" ")
+        if state.find("off") == 0:
+            footer = "To start the server please run '%mc_start'"
 
-            players_on = ""
-            for x in range(10, len(temp_list)):
-                player = temp_list[x]
-                players_on = players_on + f"- {player}"
-
-            state = f"ON\nPlayers on: {players_count}\n{players_on}"
-
-        msg = (
-            f"```Minecraft {pack}\n"
-            + f"Version: {pack_version}\n"
-            + f"Download link: {pack_download_link}\n"
-            + "\n"
-            + f"IP: {public_ip}\n"
-            + f"State: {state}\n"
-            + "\n"
-            + f"{server_description}\n"
-            + "```"
+        embed = discord.Embed(
+            title=f"Server Minecraft {pack}",
+            description=server_description,
+            color=discord.Color.green(),
         )
-        return await ctx.send(msg)
+        # embed.set_image(url=self.request_server("icon"))
+        embed.add_field(name="IP", value=public_ip)
+        embed.add_field(name="State", value=state, inline=True)
+        if players_list is not None:
+            embed.add_field(name="Players", value=players_list, inline=False)
+        embed.add_field(name="modpack", value=pack_download_link, inline=False)
+        embed.add_field(name="version", value=pack_version, inline=True)
+        if footer is not None:
+            embed.set_footer(text=footer)
+        await ctx.send(embed=embed)
 
-    async def server_command(self, command):
-        if self.server_started is False:
-            return
-        self.server.stdin.write((command + "\n").encode())
-        self.server.stdin.flush()
-
-    async def server_start(self, ctx):
-        minecraft_dir = os.getenv("MC_Server_dir")
-        server_jar = os.getenv("MC_Server_jar_file")
-        minRam = os.getenv("MC_alloc_mem_min")
-        maxRam = os.getenv("MC_alloc_mem_max")
-        java_parameters = "-XX:+UseG1GC -Dsun.rmi.dgc.server.gcInterval=2147483646 -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M -Dfml.readTimeout=180"
-        public_ip = os.getenv("MC_Server_public_ip")
-
-        executable = f"~/minecraft-server/jdk8u312-b07/bin/java -server {java_parameters} -Xms{minRam} -Xmx{maxRam} -jar {server_jar} nogui"
-        if self.server_started:
-            return await ctx.send("Sever is already STARTED")
-        print(
-            f"starting minecraft server - dir: {minecraft_dir} | executable: {executable}"
-        )
-        self.server = subprocess.Popen(
-            executable, stdin=subprocess.PIPE, cwd=minecraft_dir, shell=True
-        )
-        self.server_started = True
-        self.time = self.wait_time
-        await ctx.send(
-            f"Server is starting! Please wait 7 minutes... IP: `{public_ip}`\n"
-            + f"If no one joins within {self.wait_time} minutes the server will close"
-        )
-
-    async def server_stop(self, ctx, now=False):
-        if self.server_started is False:
-            return await ctx.send("Sever is already STOPPED")
-
-        print("Server stopping...")
-
-        if not now:
-            await self.server_command("say Shutting down in 5 minutes!")
-            time.sleep(240)  # wait 4 minutes
-            await self.server_command("say Shutting down in 1 minute!")
-            time.sleep(30)  # wait a few seconds in between messages
-            await self.server_command("say Shutting down in 30 seconds!")
-            time.sleep(20)  # wait a few seconds in between messages
-            await self.server_command("say Shutting down in 10 seconds!")
-            time.sleep(5)  # wait a few seconds in between messages
-            await self.server_command("say Shutting down in 5 seconds!")
-            time.sleep(5)  # wait a few seconds in between messages
-
-        await self.server_command("stop")
-        time.sleep(120)
-        self.server.kill()
-        time.sleep(10)  # wait 10 more seconds to let things cool down
-        self.server_started = False
-
-    @commands.command(
-        name="mc_admin",
-        help="Minecraft server control. %mc help for more info",
-        hidden=True,
-    )
-    @commands.is_owner()
-    async def mc_admin(self, ctx, arg1):
-        arg1 = str(arg1).lower()
-
-        if arg1.find("help") != -1:
-            return await self.mc_help(ctx)
-
-        if arg1.find("start") != -1:
-            return await self.server_start(ctx)
-
-        if arg1.find("stop_now") != -1:
-            return await self.server_stop(ctx, now=True)
-
-        if arg1.find("stop") != -1:
-            return await self.server_stop(ctx)
-
-        return await ctx.send(
-            f'Invalid argument "{arg1}"\nType `%mc help` for a list of options'
-        )
-
-    @mc_admin.error
-    async def mc_admin_error(self, ctx, error):
-        if isinstance(error, commands.MissingRequiredArgument):
-            await self.mc_help(ctx)
-
-    @commands.command(
-        name="mc",
-        help="Minecraft server control. %mc help for more info",
-    )
-    async def mc(self, ctx, arg1):
-        arg1 = str(arg1).lower()
-
-        if arg1.find("help") != -1:
-            return await self.mc_help(ctx)
-
-        if arg1.find("start") != -1:
-            return await self.server_start(ctx)
-
-        if arg1.find("info") != -1:
-            return await self.mc_info(ctx)
-
-        return await ctx.send(
-            f'Invalid argument "{arg1}"\nType `%mc help` for a list of options'
-        )
-
-    @mc.error
-    async def mc_error(self, ctx, error):
-        if isinstance(error, commands.MissingRequiredArgument):
-            await self.mc_help(ctx)
+    # async def server_command(self, command):
+    # TODO
 
 
 def setup(bot):
