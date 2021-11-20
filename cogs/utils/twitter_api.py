@@ -23,7 +23,8 @@ api = tweepy.API(auth)
 
 def get_user_info(account):
     try:
-        return api.get_user(screen_name=account).id_str
+        user = api.get_user(screen_name=account)
+        return {"tag": user.id_str, "name": user.screen_name}
     except:
         return None
 
