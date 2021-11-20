@@ -13,7 +13,7 @@ load_dotenv()
 class cat_mc_server(commands.Cog, name="Minecraft server control"):
     def __init__(self, bot):
         self.bot = bot
-        self.wait_time = os.getenv("MC_idle_minutes")
+        self.wait_time = int(os.getenv("MC_idle_minutes"))
         self.time = 0
         self.on_minute.start()
 
@@ -24,7 +24,8 @@ class cat_mc_server(commands.Cog, name="Minecraft server control"):
     async def on_minute(self):
         if self.time > 0:
             self.time -= 1
-
+        if self.request_server("state").find("starting") == 0:
+            self.time = self.wait_time
         if self.request_server("state").find("on") == 0:
             players_list = self.request_server("list")
             players_on = int(players_list.split(" ")[2].split("/")[0])
@@ -60,6 +61,7 @@ class cat_mc_server(commands.Cog, name="Minecraft server control"):
             await ctx.send("Server is already starting")
 
         if state.find("off") == 0:
+            self.time = self.wait_time
             self.request_server("start")
             await ctx.send("Starting the server")
 
@@ -121,7 +123,7 @@ class cat_mc_server(commands.Cog, name="Minecraft server control"):
             description=server_description,
             color=discord.Color.green(),
         )
-        # embed.set_image(url=self.request_server("icon"))
+        # embed.set_image(url=f"{rcon}/icon")
         embed.add_field(name="IP", value=public_ip)
         embed.add_field(name="State", value=state, inline=True)
         if players_list is not None:
