@@ -1,0 +1,16 @@
+{
+    "social_platform": {
+        "1": {
+            "name": "twitter",
+            "available": true
+        },
+        "2": {
+            "name": "youtube",
+            "available": true
+        },
+        "3": {
+            "name": "twitch",
+            "available": false
+        }
+    }
+}
