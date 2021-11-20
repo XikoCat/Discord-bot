@@ -37,6 +37,10 @@ class cat_mc_server(commands.Cog, name="Minecraft server control"):
                 self.request_server("stop")
                 print("Stopping the server!")
 
+    @on_minute.before_loop
+    async def before_on_minute(self):
+        await self.bot.wait_until_ready()
+
     @commands.command(
         name="mc",
         help="Minecraft server info",

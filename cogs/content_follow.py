@@ -1,10 +1,4 @@
 from datetime import datetime
-from logging import debug
-from os import name
-from re import sub
-from discord import channel
-
-import time
 
 from discord.ext import commands, tasks
 from discord.ext.commands.core import guild_only
