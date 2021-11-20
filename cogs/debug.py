@@ -1,6 +1,7 @@
+from datetime import datetime
+
 import discord
 from discord.ext import commands
-from datetime import datetime
 
 
 class cat_debug(commands.Cog, name="Debug commands"):

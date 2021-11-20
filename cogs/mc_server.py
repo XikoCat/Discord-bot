@@ -1,9 +1,10 @@
-import discord
-from discord.ext import commands, tasks
 import os
+
+import discord
+import requests
+from discord.ext import commands, tasks
 from discord.ext.commands.converter import PartialMessageConverter
 from dotenv import load_dotenv
-import requests
 from requests.api import request
 
 load_dotenv()

@@ -1,7 +1,6 @@
-import discord
 import os
-import time
 
+import discord
 from discord.ext import commands, tasks
 from discord.ext.commands import Context
 from dotenv import load_dotenv
@@ -17,7 +16,7 @@ intents = discord.Intents.default()
 intents.members = True
 bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 
-cogs = ["admin", "fun", "nhentai", "debug", "mc_server"]
+cogs = ["admin", "fun", "nhentai", "debug", "content_follow", "mc_server"]
 for cog in cogs:
     print(f"Loading cog: {cog}")
     bot.load_extension("cogs." + cog)
@@ -46,8 +45,8 @@ async def on_message(message):
             "Why!? Why would you bring that bloody cursed word upon this land!"
         )
 
-    if message_string in ["swear_word1", "swear_word2"]:
-        await message.channel.purge(limit=1)
+    # if message_string in ["swear_word1", "swear_word2"]:
+    #    await message.channel.purge(limit=1)
 
 
 if __name__ == "__main__":

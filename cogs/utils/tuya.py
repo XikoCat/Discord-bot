@@ -1,5 +1,6 @@
-import tinytuya
 import json
+
+import tinytuya
 
 
 def load_json_f(path):

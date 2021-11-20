@@ -1,10 +1,12 @@
+from datetime import datetime
 from logging import debug
 from os import name
+
 from discord.ext import commands, tasks
 from discord.ext.commands.core import guild_only
 from discord.utils import get
-from datetime import datetime
 from tinydb.queries import Query
+
 from .utils import twitter_api, youtube_api
 from .utils.json_db import db
 

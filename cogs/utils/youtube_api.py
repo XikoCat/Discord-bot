@@ -1,9 +1,9 @@
+import os
 from http.client import NO_CONTENT, responses
+
+from dotenv import load_dotenv
 from google.auth.transport import Request
 from googleapiclient.discovery import build, build_from_document
-import os
-from dotenv import load_dotenv
-import requests
 
 load_dotenv()
 

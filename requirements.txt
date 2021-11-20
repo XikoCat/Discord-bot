@@ -28,6 +28,7 @@ platformdirs==2.4.0
 protobuf==3.19.1
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
+pycryptodome==3.11.0
 pyparsing==3.0.6
 python-dotenv==0.19.2
 regex==2021.11.10
@@ -37,6 +38,7 @@ rsa==4.7.2
 six==1.16.0
 soupsieve==2.3.1
 tinydb==4.5.2
+tinytuya==1.2.10
 tomli==1.2.2
 tweepy==4.4.0
 typed-ast==1.5.0
