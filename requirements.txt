@@ -30,6 +30,7 @@ pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycryptodome==3.11.0
 pyparsing==3.0.6
+python-dateutil==2.8.2
 python-dotenv==0.19.2
 regex==2021.11.10
 requests==2.26.0
@@ -41,9 +42,11 @@ tinydb==4.5.2
 tinytuya==1.2.10
 tomli==1.2.2
 tweepy==4.4.0
+twitchAPI==2.5.1
 typed-ast==1.5.0
 typing-extensions==3.10.0.2
 uritemplate==4.1.1
 urllib3==1.26.7
+websockets==10.1
 yarl==1.7.2
 zipp==3.6.0

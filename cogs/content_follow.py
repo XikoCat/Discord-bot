@@ -1,11 +1,12 @@
 from datetime import datetime
 
+import discord
 from discord.ext import commands, tasks
 from discord.ext.commands.core import guild_only
 from discord.utils import get
 from tinydb.queries import where
 
-from .utils import twitter_api, youtube_api
+from .utils import twitter_api, youtube_api, twitch_api
 from .utils.json_db import db
 
 
@@ -31,7 +32,7 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
         if self.debug:
             print("   - " + msg)
 
-    @tasks.loop(minutes=3)
+    @tasks.loop(minutes=1)
     async def check_creator_posts(self):
         now = datetime.now()
         print(f"[{now}] Checking for new posts!")
@@ -48,16 +49,14 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
 
             # get the latest post
             post = self.getPost(creator["social_platform"], creator["tag"])
-            post_link = post["link"]
-            post_username = post["username"]
 
             # if post is different from the last saved
-            if str(creator["last_read"]).find(post_link) == -1:
-                print(f" - Found new post from {post_username}: {post_link}")
+            if str(creator["last_read"]).find(post["link"]) == -1:
+                print(f" - Found new post from {post['username']}: {post['link']}")
 
                 # update last_read to new post
                 self.content_creator.update(
-                    {"last_read": post_link}, doc_ids=(creator.doc_id,)
+                    {"last_read": post["link"]}, doc_ids=(creator.doc_id,)
                 )
 
                 # get all subscriptions to creator
@@ -83,9 +82,24 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
                         continue
 
                     # broadcast to new post to channel
-                    await guild_channel.send(
-                        f" {post_username} just posted:\n{post_link}"
-                    )
+                    # TODO CUSTOM MESSAGE PER PLATFORM
+                    if creator["social_platform"] == 1:
+                        message = f" {post['username']} just tweeted:\n{post['link']}"
+                        await guild_channel.send(message)
+                    if creator["social_platform"] == 2:
+                        message = f" {post['username']} just posted:\n{post['link']}"
+                        await guild_channel.send(message)
+                    if creator["social_platform"] == 3:
+                        embed = discord.Embed(
+                            title=f" {post['username']} is now live on Twitch!",
+                            description=post['title'],
+                            color=discord.Color.purple(),
+                            url=post["link"]
+                        )
+                        embed.set_image(url=post["thumbnail_url"])
+                        embed.add_field(name="Jogo", value=post["game_name"])
+                        await guild_channel.send("@here")
+                        await guild_channel.send(embed=embed)
 
                     # Extra - verify channel and guild name
                     if channel["guild_name"].find(guild.name) == -1:
@@ -120,6 +134,8 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
             return twitter_api.get_latest_tweet(account)
         if platform == 2:
             return youtube_api.get_latest_video(account)
+        if platform == 3:
+            return twitch_api.get_stream_info(account)
         # TODO ADD MORE PLATORMS
 
     async def getPlatformId(self, ctx, arg):
@@ -221,21 +237,19 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
             return None
 
     async def getCreatorInfo(self, ctx, platform_id, creator_arg):
+        # TODO Add more platforms
         # if creator exists on twitter
         if platform_id == 1:
             creator_info = twitter_api.get_user_info(creator_arg)
-            self.debugPrint(f"creator_info: {creator_info}")
-            if creator_info is None:
-                err_msg = f"[err:3a] Invalid twitter user: {creator_arg}"
-                self.debugPrint(err_msg)
-                await ctx.send(err_msg)
-                return None
         # if creator exists on youtube
         if platform_id == 2:
             creator_info = youtube_api.get_channel_info(creator_arg)
+        # if creator exists on twitch
+        if platform_id == 3:
+            creator_info = twitch_api.get_user_info(creator_arg)
             self.debugPrint(f"creator_info: {creator_info}")
             if creator_info is None:
-                err_msg = f"[err:3b] Invalid youtube channel: {creator_arg} \nTip: you can search by channel ID, channel Username, or channel Name"
+                err_msg = f"[err:3a] Invalid user: {creator_arg}"
                 self.debugPrint(err_msg)
                 await ctx.send(err_msg)
                 return None
