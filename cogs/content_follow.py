@@ -238,6 +238,7 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
 
     async def getCreatorInfo(self, ctx, platform_id, creator_arg):
         # TODO Add more platforms
+        self.debugPrint(f"Getting Creator Info of {creator_arg} on platform id {platform_id}")
         # if creator exists on twitter
         if platform_id == 1:
             creator_info = twitter_api.get_user_info(creator_arg)
