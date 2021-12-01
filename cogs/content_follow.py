@@ -49,6 +49,8 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
 
             # get the latest post
             post = self.getPost(creator["social_platform"], creator["tag"])
+            if post is None:
+                continue
 
             # if post is different from the last saved
             if str(creator["last_read"]).find(post["link"]) == -1:
@@ -92,9 +94,9 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
                     if creator["social_platform"] == 3:
                         embed = discord.Embed(
                             title=f" {post['username']} is now live on Twitch!",
-                            description=post['title'],
+                            description=post["title"],
                             color=discord.Color.purple(),
-                            url=post["link"]
+                            url=post["link"],
                         )
                         embed.set_image(url=post["thumbnail_url"])
                         embed.add_field(name="Jogo", value=post["game_name"])
@@ -238,7 +240,9 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
 
     async def getCreatorInfo(self, ctx, platform_id, creator_arg):
         # TODO Add more platforms
-        self.debugPrint(f"Getting Creator Info of {creator_arg} on platform id {platform_id}")
+        self.debugPrint(
+            f"Getting Creator Info of {creator_arg} on platform id {platform_id}"
+        )
         # if creator exists on twitter
         if platform_id == 1:
             creator_info = twitter_api.get_user_info(creator_arg)

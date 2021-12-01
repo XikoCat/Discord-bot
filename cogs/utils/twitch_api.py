@@ -19,8 +19,13 @@ def get_user_info(account):
 
 
 def get_stream_info(id):
-    info = twitch.search_channels(query=id, first=1)["data"].pop()
-    
+    info = twitch.search_channels(query=id, first=1)["data"]
+    if len(info) == 0:
+        print(f"Error getting twitch info for {id}")
+        return None
+
+    info = info.pop()
+
     time = info["started_at"]
     link = f"https://www.twitch.tv/{id}?{time}"
     username = info["display_name"]
