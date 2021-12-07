@@ -1,3 +1,4 @@
+import configparser
 from datetime import datetime
 
 import discord
@@ -9,6 +10,8 @@ from tinydb.queries import where
 from .utils import twitter_api, youtube_api, twitch_api
 from .utils.json_db import db
 
+configs = configparser.ConfigParser()
+configs.read("configs/content_follow.ini")
 
 class cat_content_follow(commands.Cog, name="Content Follow"):
     """Documentation"""
@@ -18,10 +21,21 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
         self.debug = True
 
         # Database
-        self.platform_list = db.table("social_platform")
+        self.platform_list = db.table("social_platform")        
         self.subscription = db.table("subscription")
         self.discord_channel = db.table("discord_channel")
         self.content_creator = db.table("content_creator")
+
+        # Verify enabled platforms from config file
+        self.platform_list.upsert(
+            {"name":'twitter', "available": configs.get('TWITTER', 'Available').find('true') == 0}, doc_ids=(1,)
+            )
+        self.platform_list.upsert(
+            {"name":'youtube', "available": configs.get('YOUTUBE', 'Available').find('true') == 0}, doc_ids=(2,)
+            )
+        self.platform_list.upsert(
+            {"name":'twitch', "available": configs.get('TWITCH', 'Available').find('true') == 0}, doc_ids=(3,)
+            )
 
         self.check_creator_posts.start()
 
@@ -86,12 +100,21 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
                     # broadcast to new post to channel
                     # TODO CUSTOM MESSAGE PER PLATFORM
                     if creator["social_platform"] == 1:
-                        message = f" {post['username']} just tweeted:\n{post['link']}"
+                        message = configs.get('TWITTER', 'Custom_message').format(
+                            username = post['username']
+                            ) + f"\n{post['link']}"
                         await guild_channel.send(message)
                     if creator["social_platform"] == 2:
-                        message = f" {post['username']} just posted:\n{post['link']}"
+                        message = configs.get('YOUTUBE', 'Custom_message').format(
+                            username = post['username']
+                            ) + f"\n{post['link']}"
                         await guild_channel.send(message)
                     if creator["social_platform"] == 3:
+                        message = configs.get('TWITCH', 'Custom_message').format(
+                            username = post['username'],
+                            title = post["title"],
+                            game_name = post["game_name"]
+                            ) + f"\n{post['link']}"
                         embed = discord.Embed(
                             title=f" {post['username']} is now live on Twitch!",
                             description=post["title"],
@@ -100,7 +123,7 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
                         )
                         embed.set_image(url=post["thumbnail_url"])
                         embed.add_field(name="Jogo", value=post["game_name"])
-                        await guild_channel.send("@here")
+                        await guild_channel.send(message)
                         await guild_channel.send(embed=embed)
 
                     # Extra - verify channel and guild name

@@ -1,8 +1,6 @@
 import random
 
-import discord
 from discord.ext import commands
-
 
 class cat_fun(commands.Cog, name="Fun"):
     """Documentation"""

@@ -1,15 +1,12 @@
-import os
-from http.client import NO_CONTENT, responses
+import configparser
+from googleapiclient.discovery import build
 
-from dotenv import load_dotenv
-from google.auth.transport import Request
-from googleapiclient.discovery import build, build_from_document
+configs = configparser.ConfigParser()
+configs.read("configs/content_follow.ini")
 
-load_dotenv()
-
-api_key = os.getenv("Youtube_API_key")
-
-youtube = build("youtube", "v3", developerKey=api_key)
+if configs.get('YOUTUBE', 'Available').find('true') == 0:
+    api_key = configs.get('YOUTUBE', 'Youtube_API_key')
+    youtube = build("youtube", "v3", developerKey=api_key)
 
 
 def channel_by_username(username):

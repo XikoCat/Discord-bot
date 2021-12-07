@@ -1,13 +1,11 @@
-import os
-
+import configparser
 from twitchAPI.twitch import Twitch
-import twitchAPI.helper as helper
-from discord.ext.commands.core import is_owner
-from dotenv import load_dotenv
 
-load_dotenv()
+configs = configparser.ConfigParser()
+configs.read("configs/content_follow.ini")
 
-twitch = Twitch(os.getenv("Twitch_Client_ID"), os.getenv("Twitch_Client_Secret"))
+if configs.get('TWITCH', 'Available').find('true') == 0:
+    twitch = Twitch(configs.get('TWITCH', 'Twitch_Client_ID'), configs.get('TWITCH', 'Twitch_Client_Secret'))
 
 
 def get_user_info(account):

@@ -1,13 +1,12 @@
-import os
-
+import configparser
 import discord
-from discord.ext import commands, tasks
-from discord.ext.commands import Context
-from dotenv import load_dotenv
+from discord.ext import commands
 
-load_dotenv()
-DISCORD_TOKEN = os.getenv("discord_token")  # Get the API token from the .env file.
-PREFIX = os.getenv("command_prefix")  # Get the command prefix from the .env file.
+configs = configparser.ConfigParser()
+configs.read("configs/bot.ini")
+
+DISCORD_TOKEN = configs.get('GENERAL', 'discord_token')
+PREFIX = configs.get('GENERAL', 'command_prefix')
 if PREFIX is None:
     PREFIX = "!"
 print(f"prefix: {PREFIX}")
@@ -16,10 +15,14 @@ intents = discord.Intents.default()
 intents.members = True
 bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 
-cogs = ["admin", "fun", "nhentai", "debug", "content_follow", "mc_server"]
+cogs = ["admin", "content_follow", "debug", "fun", "iot", "mc_server", "nhentai"]
 for cog in cogs:
-    print(f"Loading cog: {cog}")
-    bot.load_extension("cogs." + cog)
+    print(f"Checking if cog can be loaded: {cog}")
+    cog_config = configparser.ConfigParser()
+    cog_config.read(f"configs/{cog}.ini")
+    if cog_config.get('GENERAL', 'Active').find('true') == 0:
+        print(f"Loading cog: {cog}")
+        bot.load_extension("cogs." + cog)
 
 
 @bot.event
