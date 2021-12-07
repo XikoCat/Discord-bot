@@ -46,18 +46,8 @@ TODO
 
 Content Creator follow:
 
-- Database connection;
-- Save follower channels;
-- Save subscriptions to content creators;
-- Implement Twitter API
-- Implement Twitch API
 - Implement Youtube API
-- Broadcast new posts/videos/lives to channels.
-
-Minecraft Server control;
 
 Github actions\
 Document CODE\
 Instructions on how to install and run\
-Explain `.env` file\
-Add database structure to project
