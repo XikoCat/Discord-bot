@@ -114,7 +114,7 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
                             username = post['username'],
                             title = post["title"],
                             game_name = post["game_name"]
-                            ) + f"\n{post['link']}"
+                            )
                         embed = discord.Embed(
                             title=f" {post['username']} is now live on Twitch!",
                             description=post["title"],
