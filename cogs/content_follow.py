@@ -27,13 +27,13 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
         self.content_creator = db.table("content_creator")
 
         # Verify enabled platforms from config file
-        self.platform_list.upsert(
+        self.platform_list.update(
             {"name":'twitter', "available": configs.get('TWITTER', 'Available').find('true') == 0}, doc_ids=(1,)
             )
-        self.platform_list.upsert(
+        self.platform_list.update(
             {"name":'youtube', "available": configs.get('YOUTUBE', 'Available').find('true') == 0}, doc_ids=(2,)
             )
-        self.platform_list.upsert(
+        self.platform_list.update(
             {"name":'twitch', "available": configs.get('TWITCH', 'Available').find('true') == 0}, doc_ids=(3,)
             )
 
