@@ -36,6 +36,28 @@ async def on_ready():
 async def on_message(message):
     # bot.process_commands(msg) is a coroutine that must be called here since we are overriding the on_message event
     await bot.process_commands(message)
+    
+    message_string = str(message.content).lower()
+    if message_string.find("tetr.io") != -1 or message_string.find("tetris") != -1:
+        await message.channel.send(
+            "Alguém falou em **T E T R I S**?\n⚡⚡⚡!!!Chamem o <@177524951035805697> para jogarem !!!⚡⚡⚡"
+        )
+
+    if message_string.find("caixa_nerd") != -1:
+        await message.channel.send("já visitaram o site https://caixanerd.pt ?")
+    if message_string.find("bolo") != -1:
+        await message.channel.send(
+            "https://media.discordapp.net/attachments/734800127927123989/883405449146294292/f49e5e27b7e4bdcf02816b5b19e51a6d.gif"
+        )
+
+    if message_string.find("rage") != -1:
+        await message.channel.send(
+            "https://media.discordapp.net/attachments/734800127927123989/893452560474714122/ezgif.com-gif-maker.gif"
+        )
+    if message_string.find("hype") != -1:
+        await message.channel.send(
+            "https://media.discordapp.net/attachments/734800127927123989/894964048540618832/ezgif.com-gif-maker3.gif"
+        )
 
     # message_string = str(message.content).lower()
     # if message_string.find("tetr.io") != -1 or message_string.find("tetris") != -1:
