@@ -6,10 +6,11 @@ from discord.ext import commands, tasks
 configs = configparser.ConfigParser()
 configs.read("configs/mc_server.ini")
 
+
 class cat_mc_server(commands.Cog, name="Minecraft server control"):
     def __init__(self, bot):
         self.bot = bot
-        self.wait_time = int(configs.get('GENERAL', 'Idle_minutes'))
+        self.wait_time = int(configs.get("GENERAL", "Idle_minutes"))
         self.time = 0
         self.current = 0
 
@@ -77,21 +78,18 @@ class cat_mc_server(commands.Cog, name="Minecraft server control"):
         state = self.request_server("state")
 
         if state.find("on") == 0:
-            await ctx.send(
-                "[Error] Can't change the server while it's on"
-            )
+            await ctx.send("[Error] Can't change the server while it's on")
 
         if state.find("starting") == 0:
             await ctx.send("[Error] Can't change the server while it's starting")
 
         if state.find("off") == 0:
-            self.current = (self.current + 1)
+            self.current = self.current + 1
             if not configs.has_section(f"MC_SERVER_{self.current}"):
                 self.current = 0
             await ctx.send("Changed server")
 
         return await self.server_info(ctx)
-
 
     @commands.command(
         name="mc_stop",
@@ -117,18 +115,20 @@ class cat_mc_server(commands.Cog, name="Minecraft server control"):
         return await self.server_info(ctx)
 
     def request_server(self, arg):
-        rcon = configs.get(f"MC_SERVER_{self.current}", 'Rcon_IP')
+        rcon = configs.get(f"MC_SERVER_{self.current}", "Rcon_IP")
         answ = requests.get(f"{rcon}/{arg}")
         if answ.status_code == 200:
             return answ.text
         print(f"Got error code {answ.status.code}\n")
 
     async def server_info(self, ctx):
-        public_ip = configs.get(f"MC_SERVER_{self.current}", 'Server_public_ip')
-        pack = configs.get(f"MC_SERVER_{self.current}", 'Server_pack')
-        pack_version = configs.get(f"MC_SERVER_{self.current}", 'Pack_version')
-        pack_download_link = configs.get(f"MC_SERVER_{self.current}", 'Pack_Download_link')
-        server_description = configs.get(f"MC_SERVER_{self.current}", 'Description')
+        public_ip = configs.get(f"MC_SERVER_{self.current}", "Server_public_ip")
+        pack = configs.get(f"MC_SERVER_{self.current}", "Server_pack")
+        pack_version = configs.get(f"MC_SERVER_{self.current}", "Pack_version")
+        pack_download_link = configs.get(
+            f"MC_SERVER_{self.current}", "Pack_Download_link"
+        )
+        server_description = configs.get(f"MC_SERVER_{self.current}", "Description")
 
         state = self.request_server("state")
         players_list = footer = None
@@ -160,7 +160,7 @@ class cat_mc_server(commands.Cog, name="Minecraft server control"):
 
     # async def server_command(self, command):
     # TODO
-        
+
 
 def setup(bot):
     bot.add_cog(cat_mc_server(bot))

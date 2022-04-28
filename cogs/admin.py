@@ -5,6 +5,7 @@ from discord.ext import commands
 
 from .utils import checks
 
+
 class Admin(commands.Cog, name="Admin commands"):
     """Admin-only commands that make the bot dynamic."""
 

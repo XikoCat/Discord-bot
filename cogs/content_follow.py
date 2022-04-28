@@ -13,6 +13,7 @@ from .utils.json_db import db
 configs = configparser.ConfigParser()
 configs.read("configs/content_follow.ini")
 
+
 class cat_content_follow(commands.Cog, name="Content Follow"):
     """Documentation"""
 
@@ -21,21 +22,33 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
         self.debug = True
 
         # Database
-        self.platform_list = db.table("social_platform")        
+        self.platform_list = db.table("social_platform")
         self.subscription = db.table("subscription")
         self.discord_channel = db.table("discord_channel")
         self.content_creator = db.table("content_creator")
 
         # Verify enabled platforms from config file
         self.platform_list.update(
-            {"name":'twitter', "available": configs.get('TWITTER', 'Available').find('true') == 0}, doc_ids=(1,)
-            )
+            {
+                "name": "twitter",
+                "available": configs.get("TWITTER", "Available").find("true") == 0,
+            },
+            doc_ids=(1,),
+        )
         self.platform_list.update(
-            {"name":'youtube', "available": configs.get('YOUTUBE', 'Available').find('true') == 0}, doc_ids=(2,)
-            )
+            {
+                "name": "youtube",
+                "available": configs.get("YOUTUBE", "Available").find("true") == 0,
+            },
+            doc_ids=(2,),
+        )
         self.platform_list.update(
-            {"name":'twitch', "available": configs.get('TWITCH', 'Available').find('true') == 0}, doc_ids=(3,)
-            )
+            {
+                "name": "twitch",
+                "available": configs.get("TWITCH", "Available").find("true") == 0,
+            },
+            doc_ids=(3,),
+        )
 
         self.check_creator_posts.start()
 
@@ -100,21 +113,27 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
                     # broadcast to new post to channel
                     # TODO CUSTOM MESSAGE PER PLATFORM
                     if creator["social_platform"] == 1:
-                        message = configs.get('TWITTER', 'Custom_message').format(
-                            username = post['username']
-                            ) + f"\n{post['link']}"
+                        message = (
+                            configs.get("TWITTER", "Custom_message").format(
+                                username=post["username"]
+                            )
+                            + f"\n{post['link']}"
+                        )
                         await guild_channel.send(message)
                     if creator["social_platform"] == 2:
-                        message = configs.get('YOUTUBE', 'Custom_message').format(
-                            username = post['username']
-                            ) + f"\n{post['link']}"
+                        message = (
+                            configs.get("YOUTUBE", "Custom_message").format(
+                                username=post["username"]
+                            )
+                            + f"\n{post['link']}"
+                        )
                         await guild_channel.send(message)
                     if creator["social_platform"] == 3:
-                        message = configs.get('TWITCH', 'Custom_message').format(
-                            username = post['username'],
-                            title = post["title"],
-                            game_name = post["game_name"]
-                            )
+                        message = configs.get("TWITCH", "Custom_message").format(
+                            username=post["username"],
+                            title=post["title"],
+                            game_name=post["game_name"],
+                        )
                         embed = discord.Embed(
                             title=f" {post['username']} is now live on Twitch!",
                             description=post["title"],

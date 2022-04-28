@@ -5,8 +5,9 @@ from discord.ext import commands
 configs = configparser.ConfigParser()
 configs.read("configs/admin.ini")
 
+
 def is_owner_check(message):
-    return message.author.id == configs.get('GENERAL', 'Idle_minutes')
+    return message.author.id == configs.get("GENERAL", "Idle_minutes")
 
 
 def is_owner():

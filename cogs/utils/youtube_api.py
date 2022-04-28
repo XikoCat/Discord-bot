@@ -4,8 +4,8 @@ from googleapiclient.discovery import build
 configs = configparser.ConfigParser()
 configs.read("configs/content_follow.ini")
 
-if configs.get('YOUTUBE', 'Available').find('true') == 0:
-    api_key = configs.get('YOUTUBE', 'Youtube_API_key')
+if configs.get("YOUTUBE", "Available").find("true") == 0:
+    api_key = configs.get("YOUTUBE", "Youtube_API_key")
     youtube = build("youtube", "v3", developerKey=api_key)
 
 
