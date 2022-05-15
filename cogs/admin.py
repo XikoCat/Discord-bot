@@ -1,7 +1,9 @@
 import inspect
 from collections import Counter
 
-from discord.ext import commands
+import nextcord
+from nextcord.ext import commands
+from nextcord import Interaction
 
 from .utils import checks
 
@@ -9,46 +11,57 @@ from .utils import checks
 class Admin(commands.Cog, name="Admin commands"):
     """Admin-only commands that make the bot dynamic."""
 
+    guilds = [524243523243868160, 778754130021187584]
+
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(hidden=True)
+    @nextcord.slash_command(
+        name="load", description="[Owner] Load a cog", guild_ids=guilds
+    )
     @commands.is_owner()
-    async def load(self, ctx, arg1):
+    async def load(self, interaction: Interaction, cog):
         """Loads a module."""
         try:
-            self.bot.load_extension(arg1)
+            self.bot.load_extension("cogs." + cog)
         except Exception as e:
-            await ctx.send("\N{SKULL}")
-            await ctx.send("{}: {}".format(type(e).__name__, e))
+            await interaction.response.send_message(
+                "\N{SKULL}\n{}: {}".format(type(e).__name__, e)
+            )
         else:
-            await ctx.send("\N{OK HAND SIGN}")
+            await interaction.response.send_message("\N{OK HAND SIGN}")
 
-    @commands.command(hidden=True)
+    @nextcord.slash_command(
+        name="unload", description="[Owner] Unload a cog", guild_ids=guilds
+    )
     @commands.is_owner()
-    async def unload(self, ctx, arg1):
+    async def unload(self, interaction: Interaction, cog):
         """Unloads a module."""
         try:
-            self.bot.unload_extension(arg1)
+            self.bot.unload_extension("cogs." + cog)
         except Exception as e:
-            await ctx.send("\N{SKULL}")
-            await ctx.send("{}: {}".format(type(e).__name__, e))
+            await interaction.response.send_message(
+                "\N{SKULL}\n{}: {}".format(type(e).__name__, e)
+            )
         else:
-            await ctx.send("\N{OK HAND SIGN}")
+            await interaction.response.send_message("\N{OK HAND SIGN}")
 
-    @commands.command(name="reload", hidden=True)
+    @nextcord.slash_command(
+        name="reload", description="[Owner] Reload a cog", guild_ids=guilds
+    )
     @commands.is_owner()
-    async def _reload(self, ctx, arg1):
+    async def _reload(self, interaction: Interaction, cog):
         """Reloads a module."""
 
         try:
-            self.bot.unload_extension(arg1)
-            self.bot.load_extension(arg1)
+            self.bot.unload_extension("cogs." + cog)
+            self.bot.load_extension("cogs." + cog)
         except Exception as e:
-            await ctx.send("\N{SKULL}")
-            await ctx.send("{}: {}".format(type(e).__name__, e))
+            await interaction.response.send_message(
+                "\N{SKULL}\n{}: {}".format(type(e).__name__, e)
+            )
         else:
-            await ctx.send("\N{OK HAND SIGN}")
+            await interaction.response.send_message("\N{OK HAND SIGN}")
 
     @commands.command(pass_context=True, hidden=True)
     @commands.is_owner()

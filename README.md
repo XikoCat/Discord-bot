@@ -30,24 +30,6 @@ Share any doujin from nhentai using the nh_display command\
 Find up to 3 doujin from nhentai using the nh_find command\
  `%nh_find <search>`
 
-### Content creation follow
+## Required Permissions
 
-TODO
-
-### Minecraft server control
-
-TODO
-
-## Technical stuff
-
-TODO
-
-## TODO
-
-Content Creator follow:
-
-- Implement Youtube API
-
-Github actions\
-Document CODE\
-Instructions on how to install and run\
+applications.commands
