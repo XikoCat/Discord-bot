@@ -1,7 +1,8 @@
 import configparser
 import os
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
+import botUtils
 
 # Load configs
 configs = configparser.ConfigParser()
@@ -12,35 +13,36 @@ PREFIX = configs.get("GENERAL", "command_prefix")
 if PREFIX is None:
     PREFIX = "!"
 print(f"prefix: {PREFIX}")
-
-# Load intents
-intents = nextcord.Intents.all()
-intents.members = True
-
-# Initialize client
-client = commands.Bot(command_prefix=PREFIX, intents=intents)
-slash = nextcord.slash_command()
+APPLICATION_ID = configs.get("GENERAL", "application_id")
+DEBUG_GUILD = configs.get("GENERAL", "debug_guild")
 
 
-@client.event
-async def on_ready():
-    print("Running!\nActive in:")
-    for guild in client.guilds:
-        print(f" - {guild.id} | {guild.name} | Member Count : {guild.member_count}")
+class MyBot(commands.Bot):
+    def __init__(self):
+        super().__init__(
+            command_prefix=PREFIX,
+            # help_command=help_command,
+            # tree_cls,
+            # description,
+            intents=discord.Intents.all(),
+            application_id=APPLICATION_ID,
+        )
+
+    async def setup_hook(self):
+        await self.load_extensions()
+        await bot.tree.sync(guild=discord.Object(id=DEBUG_GUILD))
+
+    async def on_ready(self):
+        print("Running!\nActive in:")
+        for guild in bot.guilds:
+            print(f" - {guild.id} | {guild.name} | Member Count : {guild.member_count}")
+
+    async def load_extensions(self):
+        to_load = botUtils.loadable_cogs()
+        for cog in to_load:
+            print(f"Loading cog: {cog}")
+            await self.load_extension(f"cogs.{cog}")
 
 
-cogs = []
-for filename in os.listdir("./cogs"):
-    if filename.endswith(".py"):
-        cogs.append(filename[:-3])
-
-for cog in cogs:
-    print(f"Checking if cog can be loaded: {cog}")
-    cog_config = configparser.ConfigParser()
-    cog_config.read(f"configs/{cog}.ini")
-    if cog_config.get("GENERAL", "Active").find("true") == 0:
-        print(f"Loading cog: {cog}")
-        client.load_extension("cogs." + cog)
-
-if __name__ == "__main__":
-    client.run(DISCORD_TOKEN)
+bot = MyBot()
+bot.run(DISCORD_TOKEN)

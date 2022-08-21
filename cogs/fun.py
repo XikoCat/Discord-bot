@@ -1,54 +1,38 @@
+import configparser
 import random
 
+import discord
+from discord import app_commands
 from discord.ext import commands
 
+# Load configs
+configs = configparser.ConfigParser()
+configs.read("configs/bot.ini")
+DEBUG_GUILD = configs.get("GENERAL", "debug_guild")
 
-class cat_fun(commands.Cog, name="Fun"):
-    """Documentation"""
 
-    def __init__(self, bot):
+class Fun(commands.Cog, name="Fun"):
+    """Fun commands"""
+
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(name="battle", help="Battle with another user")
-    async def battle(self, ctx):
-        print(
-            "Command Issued: battle\n   - message: {}\n   - debug: {}".format(
-                ctx.message.content, ctx.message
-            )
+    @app_commands.command(name="battle", description="Battle another user")
+    async def battle(
+        self, interaction: discord.Interaction, user: discord.User
+    ) -> None:
+        if interaction.user == user:
+            return await interaction.response.send_message("Don't battle yourself!")
+        winner = interaction.user if random.randint(0, 1) == 0 else user
+        return await interaction.response.send_message(
+            f"{winner.mention} won the battle!!!"
         )
-        if ctx.author.id == ctx.message.mentions[0].id:
-            await ctx.send("Don't battle yourself!")
-            return
-        winner = (
-            ctx.author.id if random.randint(0, 1) == 0 else ctx.message.mentions[0].id
-        )
-        await ctx.send(f"<@{winner}> won the battle!!!")
 
-    ##unused
-    @battle.error
-    async def battle_error(self, ctx, error):
-        if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send("I could not find that member... do `!battle @adversary`")
-        else:
-            await ctx.send(f"Erro ao iniciar a batalha: {error}")
-
-    @commands.command(
-        name="doilove", help="Find out how compatible are you with another user"
+    @app_commands.command(
+        name="doilove", description="Find out how compatible are you with another user"
     )
-    async def doilove(self, ctx):
-        print(
-            "Command Issued: doilove\n   - message: {}\n   - debug: {}".format(
-                ctx.message.content, ctx.message
-            )
-        )
-        if len(ctx.message.mentions) == 0:
-            await ctx.send(
-                "Yes you do! But WHO is the question... do `!doilove @person`"
-            )
-            return
-        lovemeter = (
-            69 - (ctx.message.author.id - ctx.message.mentions[0].id) % 69 + 4
-        ) % 11
+    async def doilove(self, interaction: discord.Interaction, user: discord.User):
+        lovemeter = (69 - (interaction.user.id + user.id) % 69 + 4) % 11
         red = lovemeter
         white = 10 - lovemeter
         msg = "<3 Love meter Ɛ> ["
@@ -70,8 +54,8 @@ class cat_fun(commands.Cog, name="Fun"):
             msg += "\nThis might just work out!"
         if lovemeter == 4 or lovemeter == 5:
             msg += "\nDamn, {} perfect for each other!!"
-        await ctx.send(msg.format(ctx.message.mentions[0].display_name))
+        await interaction.response.send_message(msg.format(user.mention))
 
 
-def setup(bot):
-    bot.add_cog(cat_fun(bot))
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Fun(bot), guilds=[discord.Object(id=DEBUG_GUILD)])

@@ -1,4 +1,5 @@
-nextcord==2.0.0a10
+discord
+slash-cog
 google-api-python-client==2.47.0
 tinydb==4.7.0
 tinytuya==1.2.10

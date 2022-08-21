@@ -14,7 +14,7 @@ configs = configparser.ConfigParser()
 configs.read("configs/content_follow.ini")
 
 
-class cat_content_follow(commands.Cog, name="Content Follow"):
+class Content_follow(commands.Cog, name="Content Follow"):
     """Documentation"""
 
     def __init__(self, bot):
@@ -475,5 +475,5 @@ class cat_content_follow(commands.Cog, name="Content Follow"):
         await ctx.send(msg)
 
 
-def setup(bot):
-    bot.add_cog(cat_content_follow(bot))
+async def setup(bot):
+    await bot.add_cog(Content_follow(bot))

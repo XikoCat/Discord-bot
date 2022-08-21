@@ -2,9 +2,10 @@ from datetime import datetime
 
 import discord
 from discord.ext import commands
+from discord import app_commands, Interaction
 
 
-class cat_debug(commands.Cog, name="Debug commands"):
+class Debug(commands.Cog, name="Debug commands"):
     """Documentation"""
 
     def __init__(self, bot):
@@ -15,6 +16,7 @@ class cat_debug(commands.Cog, name="Debug commands"):
         print(
             f"[{datetime.now()}] Command Issued: tell_me_about_yourself\n   - message: {ctx.message.content}\n   - debug: {ctx.message}"
         )
+
         text = "My name is XikoBot!\n. My creator is XikoCat. Check him out on twitter: https://twitter.com/xikocat\nType %help, to get a list of commands.\n :)"
         await ctx.send(text)
 
@@ -51,5 +53,5 @@ class cat_debug(commands.Cog, name="Debug commands"):
         await ctx.send(embed=embed)
 
 
-def setup(bot):
-    bot.add_cog(cat_debug(bot))
+async def setup(bot):
+    await bot.add_cog(Debug(bot))

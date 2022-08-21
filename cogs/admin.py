@@ -1,97 +1,90 @@
-import inspect
-from collections import Counter
+import configparser
 
-import nextcord
-from nextcord.ext import commands
-from nextcord import Interaction
+import botUtils
 
-from .utils import checks
+import discord
+from discord import app_commands, Interaction
+from discord.ext import commands
+from discord.app_commands import Choice
 
+# Load configs
+configs = configparser.ConfigParser()
+configs.read("configs/bot.ini")
+DEBUG_GUILD = configs.get("GENERAL", "debug_guild")
+
+def is_owner():
+    def predicate(it: Interaction) -> bool:
+        return it.user.id == 102838147280293888
+    return app_commands.check(predicate)
+
+def cog_list():
+    to_load = botUtils.loadable_cogs()
+    cogs = []
+    for cog in to_load:
+        cogs.append(Choice(name=f'{cog}', value=f'{cog}'))
+    return cogs
 
 class Admin(commands.Cog, name="Admin commands"):
     """Admin-only commands that make the bot dynamic."""
-
-    guilds = [524243523243868160, 778754130021187584]
-
-    def __init__(self, bot):
+    
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @nextcord.slash_command(
-        name="load", description="[Owner] Load a cog", guild_ids=guilds
-    )
-    @commands.is_owner()
-    async def load(self, interaction: Interaction, cog):
+    @app_commands.command(name="load", description="Loads a cog")
+    @is_owner()
+    @app_commands.choices(cog = cog_list())
+    async def load(self, it: Interaction, cog: Choice[str]):
         """Loads a module."""
         try:
-            self.bot.load_extension("cogs." + cog)
+            await self.bot.load_extension("cogs." + cog)
         except Exception as e:
-            await interaction.response.send_message(
+            await it.response.send_message(
                 "\N{SKULL}\n{}: {}".format(type(e).__name__, e)
             )
         else:
-            await interaction.response.send_message("\N{OK HAND SIGN}")
+            await it.response.send_message("\N{OK HAND SIGN}")
 
-    @nextcord.slash_command(
-        name="unload", description="[Owner] Unload a cog", guild_ids=guilds
-    )
-    @commands.is_owner()
-    async def unload(self, interaction: Interaction, cog):
+    @app_commands.command(name="unload", description="Unload a cog")
+    @is_owner()
+    @app_commands.choices(cog = cog_list())
+    async def unload(self, it: Interaction, cog: str):
         """Unloads a module."""
         try:
-            self.bot.unload_extension("cogs." + cog)
+            await self.bot.unload_extension("cogs." + cog)
         except Exception as e:
-            await interaction.response.send_message(
+            await it.response.send_message(
                 "\N{SKULL}\n{}: {}".format(type(e).__name__, e)
             )
         else:
-            await interaction.response.send_message("\N{OK HAND SIGN}")
+            await it.response.send_message("\N{OK HAND SIGN}")
 
-    @nextcord.slash_command(
-        name="reload", description="[Owner] Reload a cog", guild_ids=guilds
-    )
-    @commands.is_owner()
-    async def _reload(self, interaction: Interaction, cog):
+    @app_commands.command(name="reload", description="Reloads a cog")
+    @is_owner()
+    @app_commands.choices(cog = cog_list())
+    async def reload(self, it: Interaction, cog: str):
         """Reloads a module."""
 
         try:
-            self.bot.unload_extension("cogs." + cog)
-            self.bot.load_extension("cogs." + cog)
+            await self.bot.unload_extension("cogs." + cog)
+            await self.bot.load_extension("cogs." + cog)
         except Exception as e:
-            await interaction.response.send_message(
+            await it.response.send_message(
                 "\N{SKULL}\n{}: {}".format(type(e).__name__, e)
             )
         else:
-            await interaction.response.send_message("\N{OK HAND SIGN}")
+            await it.response.send_message("\N{OK HAND SIGN}")
 
-    @commands.command(pass_context=True, hidden=True)
-    @commands.is_owner()
-    async def debug(self, ctx, *, code: str):
-        """Evaluates code."""
-        code = code.strip("` ")
-        python = "```py\n{}\n```"
-        result = None
-
-        env = {
-            "bot": self.bot,
-            "ctx": ctx,
-            "message": ctx.message,
-            "server": ctx.message.server,
-            "channel": ctx.message.channel,
-            "author": ctx.message.author,
-        }
-
-        env.update(globals())
-
-        try:
-            result = eval(code, env)
-            if inspect.isawaitable(result):
-                result = await result
-        except Exception as e:
-            await self.bot.say(python.format(type(e).__name__ + ": " + str(e)))
-            return
-
-        await self.bot.say(python.format(result))
+    @app_commands.command(name="debug", description="Sends debug info to user")
+    @is_owner()
+    async def debug(self, it: Interaction):
+        await it.user.send("{}".format(it.user.id))
+        await it.response.send_message("\N{OK HAND SIGN}")
+    
+    @debug.error
+    async def debug_error(self, it: Interaction, error: discord.DiscordException):
+        await it.response.send_message('\N{SKULL}/n{}'.format(error))
 
 
-def setup(bot):
-    bot.add_cog(Admin(bot))
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Admin(bot), guilds=[discord.Object(id=DEBUG_GUILD)])
+

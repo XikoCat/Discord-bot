@@ -6,17 +6,17 @@ from shelve import Shelf
 configs = configparser.ConfigParser()
 configs.read("configs/shoutout.ini")
 
-import nextcord
-from nextcord.ext import commands
-from nextcord import Interaction
-from nextcord.ext.commands import Context
+import discord
+from discord.ext import commands
+from discord import Interaction
+from discord.ext.commands import Context
 
 from .utils.json_db import db
 from tinydb.table import Document
 from tinydb import where
 
 
-class shoutout(commands.Cog, name="Shoutout"):
+class Shoutout(commands.Cog, name="Shoutout"):
     """Documentation"""
 
     guilds = [524243523243868160, 778754130021187584]
@@ -85,5 +85,5 @@ class shoutout(commands.Cog, name="Shoutout"):
                     return
 
 
-def setup(bot):
-    bot.add_cog(shoutout(bot))
+async def setup(bot):
+    await bot.add_cog(Shoutout(bot))
